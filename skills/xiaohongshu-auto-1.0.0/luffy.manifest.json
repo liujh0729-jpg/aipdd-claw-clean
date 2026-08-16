@@ -1,0 +1,13 @@
+{
+  "stack": "python-skill-package",
+  "services": {
+    "docs": {
+      "install": "python -m pip install -r requirements.txt",
+      "check": "python -m py_compile scripts/*.py",
+      "dev": "python -m http.server 8080 --bind 0.0.0.0 --directory .",
+      "port": 8080,
+      "health": "/README.md"
+    }
+  },
+  "preview": "docs"
+}

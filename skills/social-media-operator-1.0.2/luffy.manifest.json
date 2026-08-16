@@ -1,0 +1,14 @@
+{
+  "stack": "static-skill-package",
+  "services": {
+    "skill-docs": {
+      "install": "true",
+      "lint": "python3 -m compileall skills",
+      "check": "test -f skills/social-media-operator/SKILL.md",
+      "dev": "python3 -m http.server 4173 --bind 0.0.0.0",
+      "port": 4173,
+      "health": "/"
+    }
+  },
+  "preview": "skill-docs"
+}

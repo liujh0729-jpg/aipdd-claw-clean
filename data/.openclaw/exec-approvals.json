@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "socket": {
+    "path": "/Users/luoxuxiang/Documents/wwwroot/aipdd-claw-clean-en/data/.openclaw/exec-approvals.sock",
+    "token": "am3kohifRfr3EiJ5rSBfv0BRy_on8T7l"
+  },
+  "defaults": {},
+  "agents": {}
+}

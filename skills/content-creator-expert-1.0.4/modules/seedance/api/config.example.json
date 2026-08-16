@@ -1,0 +1,6 @@
+{
+  "baseUrl": "https://your-newapi.example.com",
+  "apiKey": "",
+  "pollSeconds": 10,
+  "timeoutSeconds": 900
+}

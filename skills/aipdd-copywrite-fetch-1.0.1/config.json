@@ -1,0 +1,48 @@
+{
+  "output_dir": "",
+  "ffmpeg_path": "",
+
+  "api": {
+    "base_url": "https://api.aipdd.work",
+    "api_key": ""
+  },
+
+  "funasr": {
+    "task_type": "aipdd_funasr_transcribe",
+    "subtitle_task_type": "aipdd_funasr_subtitle",
+    "language": "auto",
+    "output_formats": ["json"],
+    "subtitle_output_formats": ["json", "srt", "vtt"],
+    "enable_emotion_labels": true,
+    "enable_speaker_diarization": true,
+    "max_duration_seconds": 3600,
+    "poll_timeout": 1800,
+    "save_subtitle_files": true
+  },
+
+  "filter": {
+    "rules": {
+      "min_digg": 20000,
+      "min_comment": 5000,
+      "min_share": 5000,
+      "logic": "digg AND (comment OR share)"
+    },
+    "process_count": 1,
+    "candidates": []
+  },
+
+  "browser": {
+    "wait_timeout": 10,
+    "api_pattern": "aweme/v1/web/aweme/detail/"
+  },
+
+  "download": {
+    "timeout": 90,
+    "chunk_size": 65536
+  },
+
+  "subtitle": {
+    "method": "api_first",
+    "max_length": 0
+  }
+}

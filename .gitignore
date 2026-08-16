@@ -1,0 +1,11 @@
+# node依赖
+node_modules/
+npm-debug.log
+
+# Mac系统垃圾文件
+.DS_Store
+**/.DS_Store
+
+# runtime二进制可执行文件
+app/runtime/
+*.bin

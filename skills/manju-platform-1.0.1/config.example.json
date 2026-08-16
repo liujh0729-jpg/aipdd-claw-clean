@@ -1,0 +1,7 @@
+{
+  "baseUrl": "https://your-manju.example.com",
+  "apiKey": "",
+  "cli": "manju-cli",
+  "cliArgs": ["--operation", "{operation}", "--input-file", "{inputFile}", "--project-dir", "{projectDir}"],
+  "workspaceDir": ""
+}

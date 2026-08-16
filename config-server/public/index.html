@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiPddClaw Setup</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+.container { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+h1 { text-align: center; font-size: 1.8em; margin-bottom: 4px; }
+h1 .claw { color: #ff6b35; }
+.subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 0.92em; }
+
+/* Language switcher */
+.lang-switch { position: fixed; top: 14px; right: 16px; z-index: 100; display: flex; gap: 4px; background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 3px; }
+.lang-switch button { background: transparent; border: none; color: #888; padding: 5px 12px; border-radius: 16px; font-size: 0.82em; cursor: pointer; transition: all 0.15s; }
+.lang-switch button.active { background: #ff6b35; color: #fff; font-weight: 600; }
+
+/* Steps */
+.steps { display: flex; gap: 0; margin-bottom: 24px; background: #1a1a1a; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+.step { flex: 1; text-align: center; padding: 12px 8px; font-size: 0.85em; color: #666; cursor: pointer; transition: all 0.2s; }
+.step.active { color: #ff6b35; background: rgba(255,107,53,0.08); font-weight: 600; }
+.step.done { color: #4caf50; }
+.step .num { display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #333; color: #888; font-size: 0.8em; margin-right: 4px; }
+.step.active .num { background: #ff6b35; color: #fff; }
+.step.done .num { background: #4caf50; color: #fff; }
+
+/* Section */
+.section { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; margin-bottom: 16px; display: none; }
+.section.active { display: block; }
+.section h2 { color: #ff6b35; font-size: 1.15em; margin-bottom: 6px; }
+.section .desc { color: #888; font-size: 0.88em; margin-bottom: 16px; }
+
+/* Model cards */
+.model-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.model-card { background: #222; border: 2px solid #333; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.15s; position: relative; }
+.model-card:hover { border-color: #555; transform: translateY(-1px); }
+.model-card.selected { border-color: #ff6b35; background: rgba(255,107,53,0.06); }
+.model-card h4 { color: #fff; font-size: 0.95em; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.model-card p { color: #888; font-size: 0.78em; line-height: 1.4; }
+.tag { font-size: 0.68em; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+.tag.hot { background: rgba(255,107,53,0.2); color: #ff6b35; }
+.tag.free { background: rgba(76,175,80,0.2); color: #4caf50; }
+.tag.cn { background: rgba(33,150,243,0.2); color: #2196f3; }
+.tag.fast { background: rgba(156,39,176,0.2); color: #ce93d8; }
+.tag.cheap { background: rgba(255,193,7,0.2); color: #ffd54f; }
+.check { position: absolute; top: 8px; right: 10px; color: #ff6b35; font-size: 1.2em; display: none; }
+.model-card.selected .check { display: block; }
+.buy-link { display: inline-flex; align-items: center; gap: 4px; color: #ff6b35; text-decoration: none; font-size: 0.82em; margin-top: 6px; }
+.buy-link:hover { text-decoration: underline; }
+
+/* Forms */
+.form-group { display: block; margin-bottom: 16px; clear: both; }
+.form-group label { display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9em; }
+input[type="text"], input[type="password"] {
+    display: block; width: 100%; min-height: 46px; padding: 11px 14px;
+    background: #222; border: 1px solid #444; border-radius: 8px; color: #fff;
+    font-size: 0.95em; outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: #ff6b35; }
+.input-wrap { position: relative; display: block; width: 100%; }
+.input-wrap input { padding-right: 70px; }
+.toggle-pw {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    min-width: 44px; height: 30px; background: #2d2d2d; border: 1px solid #444;
+    border-radius: 6px; color: #ccc; cursor: pointer; font-size: 0.82em;
+    line-height: 28px; text-align: center;
+}
+.hint { color: #888; font-size: 0.8em; margin-top: 6px; line-height: 1.5; }
+.hint a { color: #ff6b35; text-decoration: none; }
+.hint a:hover { text-decoration: underline; }
+
+/* API Key info box */
+.api-info { background: #1e1e2e; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+.api-info h4 { color: #ff6b35; font-size: 0.9em; margin-bottom: 8px; }
+.api-info .provider-links { display: flex; flex-direction: column; gap: 6px; }
+.api-info a { color: #82aaff; text-decoration: none; font-size: 0.85em; }
+.api-info a:hover { color: #ff6b35; }
+
+/* Buttons */
+.btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+.btn-primary { background: #ff6b35; color: #fff; }
+.btn-primary:hover { background: #e55a25; }
+.btn-primary:disabled { background: #444; color: #888; cursor: not-allowed; }
+.btn-secondary { background: #333; color: #ccc; }
+.btn-secondary:hover { background: #444; }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+/* Result */
+.result { text-align: center; padding: 40px 20px; }
+.result .icon { font-size: 3em; margin-bottom: 12px; }
+.result h2 { color: #4caf50; margin-bottom: 8px; }
+.result p { color: #888; font-size: 0.92em; line-height: 1.6; }
+.result .url { color: #ff6b35; font-size: 1.1em; font-weight: 600; margin: 12px 0; }
+
+/* Status bar */
+.status-bar {
+    background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot.on { background: #4caf50; animation: pulse 2s infinite; }
+.dot.off { background: #f44336; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.status-text { flex: 1; font-size: 0.9em; }
+.status-text a { color: #ff6b35; text-decoration: none; }
+
+/* Toast */
+.toast { position: fixed; top: 20px; right: 20px; background: #4caf50; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 0.9em; opacity: 0; transform: translateY(-10px); transition: all 0.3s; z-index: 999; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: #f44336; }
+
+/* Info section */
+.info-section { margin-top: 8px; }
+.info-list { display: flex; flex-direction: column; gap: 8px; }
+.info-item { background: #222; border: 1px solid #333; border-radius: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
+.info-item .info h4 { color: #fff; font-size: 0.9em; }
+.info-item .info p { color: #888; font-size: 0.78em; }
+</style>
+</head>
+<body>
+<div class="lang-switch">
+    <button id="langEn" onclick="setLang('en')" class="active">English</button>
+    <button id="langZh" onclick="setLang('zh')">中文</button>
+</div>
+<div class="container">
+    <h1><span class="claw">🦞</span> AiPddClaw Setup</h1>
+    <p class="subtitle" data-i18n="subtitle">Pick a model, enter your API key, and launch in one click</p>
+
+    <!-- Connection status -->
+    <div class="status-bar">
+        <div class="dot" id="statusDot"></div>
+        <div class="status-text" id="statusText" data-i18n="statusChecking">Checking...</div>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps">
+        <div class="step active" data-step="1" onclick="goStep(1)"><span class="num">1</span><span data-i18n="step1Label">Model</span></div>
+        <div class="step" data-step="2" onclick="goStep(2)"><span class="num">2</span><span data-i18n="step2Label">API Key</span></div>
+        <div class="step" data-step="3" onclick="goStep(3)"><span class="num">3</span><span data-i18n="step3Label">Launch</span></div>
+    </div>
+
+    <!-- Step 1: Select Model -->
+    <div class="section active" id="step1">
+        <h2 data-i18n="step1Title">Choose an AI Model</h2>
+        <p class="desc" data-i18n="step1Desc">AIPDD recommended — cheap and reliable</p>
+        <div class="model-grid" id="modelGrid"></div>
+        <div class="btn-row">
+            <button class="btn btn-primary" id="nextStep1" disabled data-i18n="next">Next →</button>
+        </div>
+    </div>
+
+    <!-- Step 2: API Key -->
+    <div class="section" id="step2">
+        <h2 data-i18n="step2Title">Enter API Key</h2>
+        <p class="desc" id="step2desc">Enter the API key for the selected model</p>
+        <div class="api-info" id="buyInfo">
+            <h4 data-i18n="howToGetKey">📌 How to get an API key?</h4>
+            <div class="provider-links" id="providerLinks"></div>
+        </div>
+        <div class="form-group">
+            <label data-i18n="baseUrlLabel">NewAPI Base URL</label>
+            <input type="text" id="apiBase" placeholder="https://newapi.aipdd.work/v1">
+            <p class="hint" data-i18n="baseUrlHint">OpenAI-compatible relay endpoint. Pre-filled by default; change if needed.</p>
+        </div>
+        <div class="form-group">
+            <label data-i18n="apiKeyLabel">API Key</label>
+            <div class="input-wrap">
+                <input type="password" id="apiKey" placeholder="sk-...">
+                <button class="toggle-pw" id="togglePwBtn" onclick="togglePw('apiKey')" data-i18n="show">Show</button>
+            </div>
+            <p class="hint" data-i18n="keyLocalHint">Your key is stored locally only and never uploaded to any server.</p>
+        </div>
+        <div class="form-group" id="siteModelsGroup" style="display:none;">
+            <label data-i18n="siteModelsLabel">Available site models (synced after saving; switchable in chat)</label>
+            <div id="siteModels" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="goStep(1)" data-i18n="back">← Back</button>
+            <button class="btn btn-primary" onclick="saveConfig()" data-i18n="saveContinue">Save & Continue →</button>
+        </div>
+    </div>
+
+    <!-- Step 3: Done -->
+    <div class="section" id="step3">
+        <div class="result">
+            <div class="icon">🦞</div>
+            <h2 data-i18n="doneTitle">Configuration Complete!</h2>
+            <p data-i18n="doneDesc">Your model and API key have been saved locally.</p>
+            <div class="url" id="gatewayUrl">http://127.0.0.1:18789</div>
+            <div style="margin-top: 28px; text-align: center;">
+                <button class="btn btn-primary" onclick="openDashboard()" style="font-size: 1.15em; padding: 16px 48px;" data-i18n="openDashboard">🚀 Open Dashboard</button>
+                <p style="color: #888; font-size: 0.8em; margin-top: 10px;" data-i18n="dashboardHint">Gateway must be running to access the Dashboard</p>
+            </div>
+            <div class="btn-row" style="justify-content: center; margin-top: 16px;">
+                <button class="btn btn-secondary" onclick="goStep(1)" data-i18n="reconfigure">Reconfigure</button>
+                <button class="btn btn-secondary" onclick="viewConfig()" data-i18n="viewConfig">View Config File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info section -->
+    <div class="section active info-section" style="display:block; margin-top: 8px;">
+        <h2 data-i18n="dirTitle">📦 Directory Overview</h2>
+        <p class="desc" data-i18n="dirDesc">Portable package structure</p>
+        <div class="info-list">
+            <div class="info-item">
+                <div class="info">
+                    <h4 data-i18n="appDir">app/ — Runtime + Core</h4>
+                    <p data-i18n="appDirDesc">Node.js runtime and OpenClaw core code</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info">
+                    <h4 data-i18n="dataDir">data/ — Config & Data</h4>
+                    <p data-i18n="dataDirDesc">API keys, chat history stored here (local only)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── i18n ────────────────────────────────────────────────────────────────────
+var I18N = {
+    en: {
+        title: "AiPddClaw Setup",
+        subtitle: "Pick a model, enter your API key, and launch in one click",
+        statusChecking: "Checking...",
+        step1Label: "Model",
+        step2Label: "API Key",
+        step3Label: "Launch",
+        step1Title: "Choose an AI Model",
+        step1Desc: "AIPDD recommended — cheap and reliable",
+        next: "Next →",
+        back: "← Back",
+        saveContinue: "Save & Continue →",
+        step2Title: "Enter API Key",
+        step2Desc: "Enter the API key for ",
+        howToGetKey: "📌 How to get an API key?",
+        baseUrlLabel: "NewAPI Base URL",
+        baseUrlHint: "OpenAI-compatible relay endpoint. Pre-filled by default; change if needed.",
+        apiKeyLabel: "API Key",
+        keyLocalHint: "Your key is stored locally only and never uploaded to any server.",
+        siteModelsLabel: "Available site models (synced after saving; switchable in chat)",
+        show: "Show",
+        hide: "Hide",
+        doneTitle: "Configuration Complete!",
+        doneDesc: "Your model and API key have been saved locally.",
+        openDashboard: "🚀 Open Dashboard",
+        dashboardHint: "Gateway must be running to access the Dashboard",
+        reconfigure: "Reconfigure",
+        viewConfig: "View Config File",
+        dirTitle: "📦 Directory Overview",
+        dirDesc: "Portable package structure",
+        appDir: "app/ — Runtime + Core",
+        appDirDesc: "Node.js runtime and OpenClaw core code",
+        dataDir: "data/ — Config & Data",
+        dataDirDesc: "API keys, chat history stored here (local only)",
+        getApiKey: "→ Get API Key",
+        providerGetKey: "🔑 ",
+        gatewayRunning: "Gateway running (port ",
+        gatewayRunningTail: ") · ",
+        openDashboardLink: "Open Dashboard →",
+        gatewayStopped: "Gateway not running · Start with Windows-Start.bat or Mac-Start.command",
+        defaultTag: "(default)",
+        needApiKey: "Please enter your API Key",
+        savedSynced: "Config saved! Synced ",
+        savedModels: " models",
+        savedOk: "Config saved!",
+        saveFailed: "Save failed: ",
+        syncFailed: "Config saved, but model sync failed: ",
+        readFailed: "Failed to read config: ",
+        aipddDesc: "Enter your API key and switch between models seamlessly",
+        tag_hot: "Recommended",
+        tag_cn: "CN",
+        tag_free: "Free tier",
+        tag_fast: "Fast",
+        tag_cheap: "Cheap",
+        langSwitch: "中文"
+    },
+    zh: {
+        title: "AiPddClaw配置中心",
+        subtitle: "选择模型，填入 API Key，一键启动",
+        statusChecking: "检测中...",
+        step1Label: "选模型",
+        step2Label: "填 Key",
+        step3Label: "启动",
+        step1Title: "选择 AI 模型",
+        step1Desc: "推荐使用 AIPDD，便宜好用",
+        next: "下一步 →",
+        back: "← 返回",
+        saveContinue: "保存并继续 →",
+        step2Title: "填写 API Key",
+        step2Desc: "请填写",
+        howToGetKey: "📌 如何获取 API Key？",
+        baseUrlLabel: "NewAPI 地址",
+        baseUrlHint: "OpenAI 兼容的中转地址，默认已填好，可按需修改",
+        apiKeyLabel: "API Key",
+        keyLocalHint: "你的 Key 仅保存在本地，不会上传到任何服务器",
+        siteModelsLabel: "站点可用模型（保存后自动同步，可在对话中切换）",
+        show: "显示",
+        hide: "隐藏",
+        doneTitle: "配置完成！",
+        doneDesc: "模型和 API Key 已保存到本地",
+        openDashboard: "🚀 打开 Dashboard",
+        dashboardHint: "需要 Gateway 运行中才能访问 Dashboard",
+        reconfigure: "重新配置模型",
+        viewConfig: "查看配置文件",
+        dirTitle: "📦 目录说明",
+        dirDesc: "便携版文件结构",
+        appDir: "app/ — 运行时 + 核心",
+        appDirDesc: "Node.js 运行时、OpenClaw 核心代码",
+        dataDir: "data/ — 配置和数据",
+        dataDirDesc: "API Key、聊天历史等保存在此（仅本地）",
+        getApiKey: "→ 获取 API Key",
+        providerGetKey: "🔑 ",
+        gatewayRunning: "Gateway 运行中 (端口 ",
+        gatewayRunningTail: ") · ",
+        openDashboardLink: "打开 Dashboard →",
+        gatewayStopped: "Gateway 未启动 · 请先运行 Windows-Start.bat 或 Mac-Start.command",
+        defaultTag: "(默认)",
+        needApiKey: "请填写 API Key",
+        savedSynced: "配置已保存！已同步 ",
+        savedModels: " 个模型",
+        savedOk: "配置已保存！",
+        saveFailed: "保存失败: ",
+        syncFailed: "配置已保存，但模型同步失败: ",
+        readFailed: "读取配置失败: ",
+        aipddDesc: "输入API key，无缝切换使用各模型",
+        tag_hot: "推荐",
+        tag_cn: "国内",
+        tag_free: "有免费",
+        tag_fast: "快",
+        tag_cheap: "便宜",
+        langSwitch: "English"
+    }
+};
+
+var CURRENT_LANG = "en";
+function t(key) { return (I18N[CURRENT_LANG] && I18N[CURRENT_LANG][key]) || (I18N.en[key]) || key; }
+
+// Apply translations to all static elements marked with data-i18n
+function applyI18n() {
+    document.documentElement.lang = CURRENT_LANG;
+    document.title = t("title");
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+        el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    // Language switcher buttons
+    document.getElementById("langEn").classList.toggle("active", CURRENT_LANG === "en");
+    document.getElementById("langZh").classList.toggle("active", CURRENT_LANG === "zh");
+    document.getElementById("langEn").textContent = "English";
+    document.getElementById("langZh").textContent = "中文";
+    renderModelCards();
+    checkGateway();
+}
+
+function setLang(lang) {
+    CURRENT_LANG = lang;
+    try { localStorage.setItem("aipdd-lang", lang); } catch (e) {}
+    applyI18n();
+}
+
+// ── Provider definitions ────────────────────────────────────────────────────
+var PROVIDERS = [
+    { id: "AIPDD", name: "NewAPI-AIPDD", desc: { en: "Enter your API key and switch between models seamlessly", zh: "输入API key，无缝切换使用各模型" }, base: "https://newapi.aipdd.work/v1", model: "deepseek-v4-flash", buyUrl: "https://newapi.aipdd.work", tags: ["hot", "cn"] },
+    { id: "minimax", name: "MiniMax", desc: { en: "MiniMax-Text-01, fast and cost-effective", zh: "MiniMax-Text-01，速度快，性价比高" }, base: "https://api.minimax.chat/v1", model: "MiniMax-Text-01", buyUrl: "https://platform.minimaxi.com/", tags: ["hot", "cn"] },
+    { id: "kimi", name: "Kimi (Moonshot)", desc: { en: "moonshot-v1-auto, smart model routing", zh: "moonshot-v1-auto，智能选模型" }, base: "https://api.moonshot.cn/v1", model: "moonshot-v1-auto", buyUrl: "https://platform.moonshot.cn/", tags: ["cn", "fast"] },
+    { id: "deepseek", name: "DeepSeek", desc: { en: "deepseek-chat, ultra-low price", zh: "deepseek-chat，超低价格" }, base: "https://api.deepseek.com/v1", model: "deepseek-chat", buyUrl: "https://platform.deepseek.com/", tags: ["cn", "cheap"] },
+    { id: "zai", name: "Zhipu GLM", desc: { en: "glm-5, free quota available", zh: "glm-5，免费额度可用" }, base: "", model: "glm-5", buyUrl: "https://open.bigmodel.cn/", tags: ["cn", "free"] },
+    { id: "qwen", name: "Qwen (Tongyi)", desc: { en: "qwen-turbo, by Alibaba Cloud", zh: "qwen-turbo，阿里云出品" }, base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-turbo", buyUrl: "https://dashscope.console.aliyun.com/", tags: ["cn", "free"] },
+    { id: "doubao", name: "Doubao (ByteDance)", desc: { en: "doubao-1.5-pro, by ByteDance", zh: "doubao-1.5-pro，字节跳动" }, base: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-1.5-pro-32k", buyUrl: "https://console.volcengine.com/ark", tags: ["cn", "fast"] },
+    { id: "openai", name: "OpenAI", desc: { en: "GPT-4o, needs a VPN or relay", zh: "GPT-4o，需翻墙或中转" }, base: "https://api.openai.com/v1", model: "gpt-4o", buyUrl: "https://platform.openai.com/", tags: ["hot"] },
+    { id: "anthropic", name: "Anthropic", desc: { en: "Claude Sonnet 4, needs a VPN or relay", zh: "Claude Sonnet 4，需翻墙或中转" }, base: "https://api.anthropic.com/v1", model: "claude-sonnet-4-20250514", buyUrl: "https://console.anthropic.com/", tags: ["hot"] },
+    { id: "groq", name: "Groq", desc: { en: "Llama 3.3 70B, ultra-fast inference", zh: "Llama 3.3 70B，超高速推理" }, base: "https://api.groq.com/openai/v1", model: "llama-3.3-70b-versatile", buyUrl: "https://console.groq.com/", tags: ["fast", "free"] },
+    { id: "siliconflow", name: "SiliconFlow", desc: { en: "Aggregated models at low prices", zh: "多模型聚合，价格低" }, base: "https://api.siliconflow.cn/v1", model: "Qwen/Qwen2.5-72B-Instruct", buyUrl: "https://cloud.siliconflow.cn/", tags: ["cn", "cheap"] },
+];
+
+var TAG_LABELS = { hot: { en: "Recommended", zh: "推荐" }, cn: { en: "CN", zh: "国内" }, free: { en: "Free tier", zh: "有免费" }, fast: { en: "Fast", zh: "快" }, cheap: { en: "Cheap", zh: "便宜" } };
+
+// ── State ───────────────────────────────────────────────────────────────────
+var selectedProvider = null;
+var activationInfo = null;
+
+// ── Load activation info ───────────────────────────────────────────────────
+async function loadActivationInfo() {
+    try {
+        var res = await fetch("/api/activation-info");
+        if (!res.ok) return;
+        activationInfo = await res.json();
+        if (!activationInfo) return;
+        // Update AIPDD provider entry with dynamic values
+        var aipdd = PROVIDERS.find(function(x) { return x.id === "AIPDD"; });
+        if (aipdd) {
+            aipdd.base = activationInfo.baseUrl;
+            aipdd.model = activationInfo.defaultModel;
+            // Display name from config.json siteName (affects cards and step 2)
+            if (activationInfo.siteName) {
+                aipdd.name = activationInfo.siteName;
+            }
+            // Buy link points to the site domain from config.json (siteUrl first)
+            if (activationInfo.siteUrl) {
+                aipdd.buyUrl = activationInfo.siteUrl;
+            } else if (activationInfo.stationUrl) {
+                aipdd.buyUrl = activationInfo.stationUrl;
+            }
+            aipdd.desc = { en: "Enter your API key and switch between models seamlessly", zh: "输入API key，无缝切换使用各模型" };
+            renderModelCards();
+        }
+    } catch (e) {}
+}
+
+// ── Render provider cards ───────────────────────────────────────────────────
+function renderModelCards() {
+    var grid = document.getElementById("modelGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    PROVIDERS.forEach(function(p) {
+        var card = document.createElement("div");
+        card.className = "model-card" + (selectedProvider === p.id ? " selected" : "");
+        card.dataset.provider = p.id;
+        var tagsHtml = p.tags.map(function(tag) {
+            var label = TAG_LABELS[tag] ? TAG_LABELS[tag][CURRENT_LANG] : tag;
+            return '<span class="tag ' + tag + '">' + label + '</span>';
+        }).join("");
+        var descText = (p.desc && typeof p.desc === "object") ? (p.desc[CURRENT_LANG] || p.desc.en) : p.desc;
+        card.innerHTML =
+            '<span class="check">✓</span>' +
+            '<h4>' + p.name + ' ' + tagsHtml + '</h4>' +
+            '<p>' + descText + '</p>' +
+            '<a class="buy-link" href="' + p.buyUrl + '" target="_blank" onclick="event.stopPropagation()">' + t("getApiKey") + '</a>';
+        card.addEventListener("click", function(e) {
+            if (e.target.closest(".buy-link")) return;
+            document.querySelectorAll("#step1 .model-card").forEach(function(c) { c.classList.remove("selected"); });
+            card.classList.add("selected");
+            selectedProvider = p.id;
+            document.getElementById("nextStep1").disabled = false;
+        });
+        grid.appendChild(card);
+    });
+}
+
+// ── Build OpenClaw config ───────────────────────────────────────────────────
+function buildConfig(provider, base, model, apiKey) {
+    var baseConfig = {
+        gateway: { auth: { mode: "token", token: "aipddclaw" } },
+        commands: { native: "auto", nativeSkills: "auto", restart: true, ownerDisplay: "raw" },
+        meta: { lastTouchedAt: new Date().toISOString() }
+    };
+
+    // Zhipu GLM uses built-in zai provider
+    if (provider === "zai") {
+        return Object.assign({}, baseConfig, {
+            env: { ZAI_API_KEY: apiKey },
+            agents: { defaults: { model: { primary: "zai/" + model } } }
+        });
+    }
+
+    // AIPDD uses its own provider name
+    if (provider === "AIPDD") {
+        var cloudProviders = {};
+        cloudProviders.AIPDD = {
+            baseUrl: base, apiKey: apiKey, api: "openai-completions",
+            models: [{ id: model, name: model, reasoning: false, input: ["text"],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 128000, maxTokens: 8192 }]
+        };
+        return Object.assign({}, baseConfig, {
+            models: { mode: "merge", pricing: { enabled: false }, providers: cloudProviders },
+            agents: { defaults: { model: { primary: "AIPDD/" + model } } }
+        });
+    }
+
+    // All other OpenAI-compatible providers
+    var providerName = provider || "myProvider";
+    var providers = {};
+    providers[providerName] = {
+        baseUrl: base, apiKey: apiKey, api: "openai-completions",
+        models: [{ id: model, name: model, reasoning: false, input: ["text"],
+            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+            contextWindow: 128000, maxTokens: 8192 }]
+    };
+    return Object.assign({}, baseConfig, {
+        models: { mode: "merge", pricing: { enabled: false }, providers: providers },
+        agents: { defaults: { model: { primary: providerName + "/" + model } } }
+    });
+}
+
+// ── Steps ───────────────────────────────────────────────────────────────────
+function goStep(n) {
+    document.querySelectorAll(".section:not(.info-section)").forEach(function(s) { s.classList.remove("active"); });
+    document.getElementById("step" + n).classList.add("active");
+    document.querySelectorAll(".steps .step").forEach(function(s, i) {
+        s.classList.remove("active", "done");
+        if (i + 1 < n) s.classList.add("done");
+        if (i + 1 === n) s.classList.add("active");
+    });
+    if (n === 2) setupStep2();
+}
+
+// ── Step 2 setup ────────────────────────────────────────────────────────────
+function setupStep2() {
+    var p = PROVIDERS.find(function(x) { return x.id === selectedProvider; });
+    if (!p) return;
+    var descText = (p.desc && typeof p.desc === "object") ? (p.desc[CURRENT_LANG] || p.desc.en) : p.desc;
+    document.getElementById("step2desc").textContent = t("step2Desc") + " " + p.name + " " + descText;
+    document.getElementById("apiBase").value = p.base;
+    var linksDiv = document.getElementById("providerLinks");
+    linksDiv.innerHTML = '<a href="' + p.buyUrl + '" target="_blank">🔑 ' + p.name + ' — ' + t("getApiKey").replace("→ ", "") + '</a>';
+    // Show already-synced site models when available (AIPDD only)
+    if (p.id === "AIPDD" && activationInfo && activationInfo.models && activationInfo.models.length) {
+        renderSiteModels(activationInfo.models, activationInfo.defaultModel);
+    } else {
+        var group = document.getElementById("siteModelsGroup");
+        if (group) group.style.display = "none";
+    }
+}
+
+// ── Toggle password ─────────────────────────────────────────────────────────
+function togglePw(id) {
+    var inp = document.getElementById(id);
+    var btn = document.getElementById("togglePwBtn");
+    if (inp.type === "password") { inp.type = "text"; btn.textContent = t("hide"); }
+    else { inp.type = "password"; btn.textContent = t("show"); }
+}
+
+// ── Render site model list (Step 2) ─────────────────────────────────────────
+function renderSiteModels(models, defaultModel) {
+    var group = document.getElementById("siteModelsGroup");
+    var box = document.getElementById("siteModels");
+    if (!group || !box || !Array.isArray(models) || models.length === 0) return;
+    box.innerHTML = models.map(function(id) {
+        var isDefault = id === defaultModel;
+        return '<span style="padding:4px 10px;border-radius:12px;font-size:0.8em;background:' +
+            (isDefault ? "#e8f5e9;color:#2e7d32;border:1px solid #81c784;" : "#f1f3f5;color:#555;border:1px solid #dee2e6;") +
+            '">' + id + (isDefault ? ' ' + t("defaultTag") : '') + '</span>';
+    }).join("");
+    group.style.display = "block";
+}
+
+// ── Save config ─────────────────────────────────────────────────────────────
+async function saveConfig() {
+    var apiKey = document.getElementById("apiKey").value.trim();
+    if (!apiKey) { showToast(t("needApiKey"), true); return; }
+
+    var p = PROVIDERS.find(function(x) { return x.id === selectedProvider; });
+    if (!p) return;
+
+    var apiBase = document.getElementById("apiBase").value.trim() || p.base;
+
+    var newPartial = buildConfig(p.id, apiBase, p.model, apiKey);
+
+    try {
+        // Merge with existing config to preserve channels etc.
+        var existing = {};
+        try {
+            var res = await fetch("/api/config");
+            if (res.ok) existing = await res.json();
+        } catch (e) {}
+        // Remove deprecated field
+        delete existing.agent;
+        // Merge: new partial overwrites models, agents, gateway, env, commands, meta
+        var merged = Object.assign({}, existing, newPartial);
+
+        var saveRes = await fetch("/api/config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(merged)
+        });
+        if (!saveRes.ok) throw new Error(t("saveFailed"));
+        var resp = await saveRes.json();
+        if (p.id === "AIPDD" && resp.models && resp.models.length) {
+            renderSiteModels(resp.models, p.model);
+            if (resp.syncError) {
+                showToast(t("syncFailed") + resp.syncError, true);
+            } else {
+                showToast(t("savedSynced") + resp.models.length + t("savedModels"));
+            }
+        } else {
+            showToast(t("savedOk"));
+        }
+        goStep(3);
+    } catch (e) {
+        showToast(t("saveFailed") + e.message, true);
+    }
+}
+
+// ── Gateway detection ───────────────────────────────────────────────────────
+var _gatewayPort = null;
+
+async function findGatewayPort() {
+    for (var p = 18789; p <= 18799; p++) {
+        try {
+            await fetch("http://127.0.0.1:" + p + "/", { mode: "no-cors" });
+            _gatewayPort = p;
+            return p;
+        } catch (e) {}
+    }
+    _gatewayPort = null;
+    return null;
+}
+
+function gatewayUrl() {
+    var p = _gatewayPort || 18789;
+    // Fragment injects token + session so the SPA auto-navigates straight to
+    // /chat?session=agent:main:main (no waiting on reconnect/redirect).
+    return "http://127.0.0.1:" + p + "/#token=aipddclaw&session=agent%3Amain%3Amain";
+}
+
+async function checkGateway() {
+    var dot = document.getElementById("statusDot");
+    var text = document.getElementById("statusText");
+    if (!dot || !text) return;
+    var port = await findGatewayPort();
+    if (port) {
+        dot.className = "dot on";
+        text.innerHTML = t("gatewayRunning") + port + t("gatewayRunningTail") + '<a href="' + gatewayUrl() + '" target="_blank">' + t("openDashboardLink") + '</a>';
+        document.getElementById("gatewayUrl").textContent = "http://127.0.0.1:" + port;
+    } else {
+        dot.className = "dot off";
+        text.innerHTML = t("gatewayStopped");
+    }
+}
+
+// ── Load existing config ────────────────────────────────────────────────────
+async function loadConfig() {
+    try {
+        var res = await fetch("/api/config");
+        var cfg = await res.json();
+
+        // Check for zai provider
+        if (cfg.env && cfg.env.ZAI_API_KEY) {
+            selectedProvider = "zai";
+            document.getElementById("apiKey").value = cfg.env.ZAI_API_KEY;
+            document.getElementById("nextStep1").disabled = false;
+            renderModelCards();
+            return;
+        }
+
+        // Check for standard providers
+        if (cfg.models && cfg.models.providers) {
+            var providerName = Object.keys(cfg.models.providers)[0];
+            if (providerName) {
+                var prov = PROVIDERS.find(function(x) { return x.id === providerName; });
+                if (prov) {
+                    selectedProvider = prov.id;
+                    document.getElementById("nextStep1").disabled = false;
+                }
+                var p = cfg.models.providers[providerName];
+                if (p.apiKey) document.getElementById("apiKey").value = p.apiKey;
+                if (p.baseUrl) document.getElementById("apiBase").value = p.baseUrl;
+            }
+        }
+        renderModelCards();
+    } catch (e) {}
+}
+
+// ── Dashboard / View config ─────────────────────────────────────────────────
+// Open the gateway waiting page instead of the chat URL directly, so clicking
+// the button while the gateway is still booting shows the loading style rather
+// than the browser's "can't reach this site" error. The page auto-redirects to
+// the chat once the gateway is ready.
+function openDashboard() {
+    window.open("/wait", "_blank");
+}
+
+async function viewConfig() {
+    try {
+        var res = await fetch("/api/config");
+        var config = await res.json();
+        var text = JSON.stringify(config, null, 2);
+        var w = window.open("", "_blank");
+        w.document.write('<pre style="background:#111;color:#eee;padding:20px;font-size:14px;">' +
+            text.replace(/</g, "&lt;") + "</pre>");
+    } catch (e) {
+        showToast(t("readFailed") + e.message, true);
+    }
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────────
+function showToast(msg, isError) {
+    var tEl = document.getElementById("toast");
+    tEl.textContent = msg;
+    tEl.className = "toast show" + (isError ? " error" : "");
+    setTimeout(function() { tEl.className = "toast"; }, 3000);
+}
+
+// ── Wire up events ──────────────────────────────────────────────────────────
+document.getElementById("nextStep1").addEventListener("click", function() { goStep(2); });
+
+// ── Init ────────────────────────────────────────────────────────────────────
+// Default language is English; remember the user's choice for next time.
+(function initLang() {
+    var saved = null;
+    try { saved = localStorage.getItem("aipdd-lang"); } catch (e) {}
+    CURRENT_LANG = (saved === "zh" || saved === "en") ? saved : "en";
+    applyI18n();
+})();
+
+renderModelCards();
+loadActivationInfo().then(function() { loadConfig(); });
+checkGateway();
+setInterval(checkGateway, 10000);
+</script>
+</body>
+</html>

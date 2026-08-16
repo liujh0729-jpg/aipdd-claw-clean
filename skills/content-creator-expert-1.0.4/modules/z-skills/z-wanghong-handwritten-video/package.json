@@ -1,0 +1,10 @@
+{
+  "name": "z-wanghong-handwritten-video-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "puppeteer-core": "25.5.0"
+  }
+}

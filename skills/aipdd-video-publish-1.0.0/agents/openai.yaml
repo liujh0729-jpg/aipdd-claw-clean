@@ -1,0 +1,7 @@
+interface:
+  display_name: "Video Publisher"
+  short_description: "通过 Ego Lite 安全准备多平台视频草稿，并停在发布前供人工复核"
+  default_prompt: "使用 $video-publisher 处理我提供的本地视频。若尚未配置，先用中文确认我拥有和默认使用的平台、视频目录及原创策略；再通过 Ego Lite 为所选平台完成上传、标题与标签、原创声明、可选封面和发布前检查。默认不要点击最终发布按钮，把每个平台留在可人工复核的状态。"
+
+policy:
+  allow_implicit_invocation: true

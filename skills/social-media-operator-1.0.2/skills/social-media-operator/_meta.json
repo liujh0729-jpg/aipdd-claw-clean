@@ -1,0 +1,6 @@
+{
+  "slug": "social-media-operator",
+  "version": "3.0.0",
+  "status": "canonical",
+  "merged_from": ["social-media-operator", "wechat-mp-cn", "xhs-note-creator", "xiaohongshu-all-in-one"]
+}

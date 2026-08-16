@@ -1,0 +1,5 @@
+{
+  "defaultApiBaseUrl": "https://improve-sz.com/",
+  "siteName": "盈普智算 ImpToken",
+  "defaultModel": "deepseek-v4-flash"
+}
