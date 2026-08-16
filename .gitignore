@@ -9,3 +9,6 @@ npm-debug.log
 # runtime二进制可执行文件
 app/runtime/
 *.bin
+
+# 将缓存目录加入忽略
+data/.openclaw/
