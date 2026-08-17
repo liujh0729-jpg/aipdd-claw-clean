@@ -1,6 +1,0 @@
-{
-  "stationUrl": "",
-  "baseUrl": "https://improve-sz.com/v1",
-  "defaultModel": "deepseek-v4-flash",
-  "activationMode": "local"
-}
