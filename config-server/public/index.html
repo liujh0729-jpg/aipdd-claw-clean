@@ -78,6 +78,18 @@ input:focus { border-color: #ff6b35; }
 .api-info a { color: #82aaff; text-decoration: none; font-size: 0.85em; }
 .api-info a:hover { color: #ff6b35; }
 
+/* Prominent back-to-gateway button */
+.back-gateway {
+    display: block; width: 100%; margin-bottom: 16px;
+    background: linear-gradient(135deg, #ff6b35, #ff8f5a);
+    color: #fff; font-weight: 600; font-size: 1em;
+    padding: 14px; border: none; border-radius: 10px; text-align: center;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 10px rgba(255, 107, 53, 0.25);
+}
+.back-gateway:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35); }
+.back-gateway:active { transform: translateY(0); }
+
 /* Buttons */
 .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; transition: all 0.15s; font-weight: 500; }
 .btn-primary { background: #ff6b35; color: #fff; }
@@ -133,6 +145,9 @@ input:focus { border-color: #ff6b35; }
         <div class="dot" id="statusDot"></div>
         <div class="status-text" id="statusText" data-i18n="statusChecking">Checking...</div>
     </div>
+
+    <!-- Back to gateway (user may have been sent here from the chat page) -->
+    <button class="back-gateway" onclick="goGateway()" data-i18n="backGateway">← Back to Gateway</button>
 
     <!-- Steps -->
     <div class="steps">
@@ -265,6 +280,8 @@ var I18N = {
         gatewayRunning: "Gateway running (port ",
         gatewayRunningTail: ") · ",
         openDashboardLink: "Open Dashboard →",
+        backGateway: "← Back to Gateway",
+        gatewayNotUp: "Gateway is not running yet. First-time users: please finish the setup above first — the chat page will open automatically once done.",
         gatewayStopped: "Gateway not running · Start with Windows-Start.bat or Mac-Start.command",
         defaultTag: "(default)",
         needApiKey: "Please enter your API Key",
@@ -321,6 +338,8 @@ var I18N = {
         gatewayRunning: "Gateway 运行中 (端口 ",
         gatewayRunningTail: ") · ",
         openDashboardLink: "打开 Dashboard →",
+        backGateway: "← 返回填写网关信息",
+        gatewayNotUp: "网关尚未启动。若是首次使用，请先完成上方配置，配置完成后聊天页面会自动打开。",
         gatewayStopped: "Gateway 未启动 · 请先运行 Windows-Start.bat 或 Mac-Start.command",
         defaultTag: "(默认)",
         needApiKey: "请填写 API Key",
@@ -657,6 +676,19 @@ async function loadConfig() {
         }
         renderModelCards();
     } catch (e) {}
+}
+
+// ── Back to gateway ─────────────────────────────────────────────────────────
+// Jump to the gateway (chat page). When the gateway is not up yet (first run
+// waits for the API key on this page), tell the user instead of sending them
+// to the browser's "can't reach this site" error.
+async function goGateway() {
+    var port = await findGatewayPort();
+    if (port) {
+        window.location.href = "http://127.0.0.1:" + port;
+    } else {
+        showToast(t("gatewayNotUp"), true);
+    }
 }
 
 // ── Dashboard / View config ─────────────────────────────────────────────────
